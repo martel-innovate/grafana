@@ -10,9 +10,8 @@ docs
 dump.rdb
 node_modules
 /local
-/tmp
-/vendor
 *.yml
 *.md
-/vendor
-/tmp
+.vscode
+bin
+Dockerfile
