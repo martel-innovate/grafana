@@ -13,9 +13,7 @@
 
   <link rel="stylesheet" href="public/build/grafana.[[ .Theme ]].css?v[[ .BuildVersion ]]">
 
-  <link rel="icon" type="image/png" href="public/img/fav32.png">
-  <link rel="mask-icon" href="public/img/grafana_mask_icon.svg" color="#F05A28">
-  <link rel="apple-touch-icon" href="public/img/fav32.png">
+  <link rel="icon" type="image/png" href="public/img/favicon-32x32.png">
 
 </head>
 
@@ -52,29 +50,6 @@
                   Docs
                 </a>
               </li>
-              <li>
-                <a href="https://grafana.com/services/support" target="_blank">
-                  <i class="fa fa-support"></i>
-                  Support Plans
-                </a>
-              </li>
-              <li>
-                <a href="https://community.grafana.com/" target="_blank">
-                  <i class="fa fa-comments-o"></i>
-                  Community
-                </a>
-              </li>
-              <li>
-                <a href="https://grafana.com" target="_blank">Grafana</a>
-                <span>v[[.BuildVersion]] (commit: [[.BuildCommit]])</span>
-              </li>
-              [[if .NewGrafanaVersionExists]]
-              <li>
-                <a href="https://grafana.com/get" target="_blank" bs-tooltip="'[[.NewGrafanaVersion]]'">
-                  New version available!
-                </a>
-              </li>
-              [[end]]
             </ul>
           </div>
         </footer>
