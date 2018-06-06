@@ -183,6 +183,21 @@ li.sidemenu-org-switcher {
     top: 1px;
   }
 }
+.sidemenu-open .sidemenu__logo {
+  background: url($logoReverseUrl);
+  background-repeat: no-repeat;
+  background-size: 30px 30px;
+  background-position: center;
+
+  &:hover {
+    background-color: $navbarButtonBackgroundHighlight;
+    background: url($logoReverseUrl);
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+    background-position: center;
+  }
+
+}
 
 .sidemenu__logo {
   display: block;
@@ -190,9 +205,17 @@ li.sidemenu-org-switcher {
   min-height: $navbarHeight;
   position: relative;
   height: $navbarHeight - 1px;
+  background: url($logoUrl);
+  background-repeat: no-repeat;
+  background-size: 30px 30px;
+  background-position: center;
 
   &:hover {
-    background: $navbarButtonBackgroundHighlight;
+    background-color: $navbarButtonBackgroundHighlight;
+    background: url($logoUrl);
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+    background-position: center;
   }
 
   img {

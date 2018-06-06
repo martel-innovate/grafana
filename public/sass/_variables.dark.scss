@@ -3,6 +3,9 @@
 
 $theme-name: dark;
 
+$logoUrl: '../img/OC_dark_600x600.png';
+$logoReverseUrl: '../img/OC_dark_600x600.png';
+
 // Grays
 // -------------------------
 $black: #000;
@@ -74,9 +77,9 @@ $text-shadow-faint: 1px 1px 4px rgb(45, 45, 45);
 // gradients
 $brand-gradient: linear-gradient(
   to right,
-  rgba(255, 213, 0, 0.7) 0%,
-  rgba(255, 68, 0, 0.7) 99%,
-  rgba(255, 68, 0, 0.7) 100%
+  rgba(255, 255, 255, 0.7) 0%,
+  rgba(102, 102, 102, 0.7) 99%,
+  rgba(102, 102, 102, 0.7) 100%
 );
 $page-gradient: linear-gradient(180deg, #222426 10px, rgb(22, 23, 25) 100px);
 

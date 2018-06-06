@@ -8,7 +8,7 @@ var datasourceTypes = [];
 
 var defaults = {
   name: '',
-  type: 'graphite',
+  type: 'crate-datasource',
   url: '',
   access: 'proxy',
   jsonData: {},

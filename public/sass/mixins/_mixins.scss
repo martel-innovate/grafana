@@ -381,9 +381,9 @@
 @mixin left-brand-border-gradient() {
   border: none;
   border-image: linear-gradient(
-    rgba(255, 213, 0, 1) 0%,
-    rgba(255, 68, 0, 1) 99%,
-    rgba(255, 68, 0, 1) 100%
+    rgba(255, 255, 255, 1) 0%,
+    rgba(102, 102, 102, 1) 99%,
+    rgba(102, 102, 102, 1) 100%
   );
   border-image-slice: 1;
   border-style: solid;
