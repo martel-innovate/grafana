@@ -312,6 +312,12 @@ Defaults to `false`.
 
 Set to true to disable (hide) the login form, useful if you use OAuth, defaults to false.
 
+### oauth_auto_login
+
+Set to true to attempt login with oauth automatically, skipping the login screen. 
+This setting is ignored if multiple OAuth providers are configured. 
+Defaults to `false`.
+
 ### disable_signout_menu
 
 Set to true to disable the signout link in the side menu. useful if you use auth.proxy, defaults to false.
