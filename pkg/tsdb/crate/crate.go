@@ -2,7 +2,6 @@ package crate
 
 import (
 	"context"
-	_ "fmt"
 	_ "path"
 	"strconv"
 	_ "strings"
@@ -41,6 +40,9 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 	if err != nil {
 		plog.Info("error", err)
 	}
+	plog.Info("Alert Context: ", ctx)
+	plog.Info("Alert DSInfo: ", dsInfo)
+	plog.Info("Alert DSJson: ", dsJson)
 
 	result := &tsdb.Response{}
 
@@ -66,9 +68,21 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 		if err != nil {
 			plog.Info("error", err)
 		}
+		plog.Info("Alert Query: ", q)
 
 		refID := q["refId"].(string)
+
 		m, err := query.Model.Get("metricAggs").Array()
+		if err != nil {
+			plog.Info("error", err)
+		}
+
+		whereClauses, err := query.Model.Get("whereClauses").Array()
+		if err != nil {
+			plog.Info("error", err)
+		}
+
+		groupByColumns, err := query.Model.Get("groupByColumns").Array()
 		if err != nil {
 			plog.Info("error", err)
 		}
@@ -78,9 +92,30 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 		for i, _ := range m {
 			metricColumn := m[i].(map[string]interface{})["column"].(string)
 
-			rows, err := db.Query("SELECT "+timeColumn+","+metricColumn+" FROM "+schema+"."+table+" WHERE "+timeColumn+">"+startTime+" AND "+timeColumn+"<"+endTime+";")
+			queryString := "SELECT "+timeColumn+","+metricColumn+" FROM "+schema+"."+table+" WHERE "+timeColumn+">"+startTime+" AND "+timeColumn+"<"+endTime
+			for i, _ := range whereClauses {
+				c := whereClauses[i].(map[string]interface{})
+				cond := "AND"
+				if c["condition"].(string) != "" {
+					cond = c["condition"].(string)
+				}
+				queryString = queryString+" "+cond+" "+c["column"].(string)+c["operator"].(string)+c["value"].(string)
+			}
+			if len(groupByColumns) != 0 {
+				queryString = queryString+" GROUP BY "+timeColumn+","+metricColumn
+				for i, _ := range groupByColumns {
+					if groupByColumns[i].(string) != metricColumn && groupByColumns[i].(string) != timeColumn {
+						queryString = queryString+","+groupByColumns[i].(string)
+					}
+				}
+			}
+			queryString = queryString+";"
+			plog.Info("Alert Query String: ", queryString)
+
+			rows, err := db.Query(queryString)
 			if err != nil {
 				plog.Info("error", err)
+				continue
 			}
 			defer rows.Close()
 
