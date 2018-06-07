@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "path"
 	"strconv"
+	"fmt"
 	_ "strings"
 	_ "encoding/json"
 	_ "io/ioutil"
@@ -40,9 +41,9 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 	if err != nil {
 		plog.Info("error", err)
 	}
-	plog.Info("Alert Context: ", ctx)
-	plog.Info("Alert DSInfo: ", dsInfo)
-	plog.Info("Alert DSJson: ", dsJson)
+	fmt.Println("Alert Context: ", ctx)
+	fmt.Println("Alert DSInfo: ", dsInfo)
+	fmt.Println("Alert DSJson: ", dsJson)
 
 	result := &tsdb.Response{}
 
@@ -68,7 +69,7 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 		if err != nil {
 			plog.Info("error", err)
 		}
-		plog.Info("Alert Query: ", q)
+		fmt.Println("Alert Query: ", q)
 
 		refID := q["refId"].(string)
 
@@ -91,8 +92,14 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 
 		for i, _ := range m {
 			metricColumn := m[i].(map[string]interface{})["column"].(string)
+			metricType := m[i].(map[string]interface{})["type"].(string)
+			queryString := ""
+			if metricType == "raw" {
+				queryString = "SELECT "+timeColumn+","+metricColumn+" FROM "+schema+"."+table+" WHERE "+timeColumn+">"+startTime+" AND "+timeColumn+"<"+endTime
+			} else {
+				queryString = "SELECT "+timeColumn+","+metricType+"("+metricColumn+")"+" FROM "+schema+"."+table+" WHERE "+timeColumn+">"+startTime+" AND "+timeColumn+"<"+endTime
+			}
 
-			queryString := "SELECT "+timeColumn+","+metricColumn+" FROM "+schema+"."+table+" WHERE "+timeColumn+">"+startTime+" AND "+timeColumn+"<"+endTime
 			for i, _ := range whereClauses {
 				c := whereClauses[i].(map[string]interface{})
 				cond := "AND"
@@ -101,16 +108,22 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 				}
 				queryString = queryString+" "+cond+" "+c["column"].(string)+c["operator"].(string)+c["value"].(string)
 			}
+			if len(groupByColumns) == 0 && metricType != "raw" {
+				queryString = queryString+" GROUP BY "+timeColumn
+			}
 			if len(groupByColumns) != 0 {
-				queryString = queryString+" GROUP BY "+timeColumn+","+metricColumn
+				queryString = queryString+" GROUP BY "+timeColumn
+				if metricType == "raw" {
+					queryString = queryString+","+metricColumn
+				}
 				for i, _ := range groupByColumns {
-					if groupByColumns[i].(string) != metricColumn && groupByColumns[i].(string) != timeColumn {
+					if groupByColumns[i].(string) != timeColumn {
 						queryString = queryString+","+groupByColumns[i].(string)
 					}
 				}
 			}
 			queryString = queryString+";"
-			plog.Info("Alert Query String: ", queryString)
+			fmt.Println("Alert Query String: ", queryString)
 
 			rows, err := db.Query(queryString)
 			if err != nil {
