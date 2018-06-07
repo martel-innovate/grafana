@@ -50,7 +50,7 @@ ENV PATH=/usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bi
 WORKDIR $GF_PATHS_HOME
 
 COPY conf ./conf
-
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p "$GF_PATHS_HOME/.aws" && \
     groupadd -r -g $GF_GID grafana && \
     useradd -r -u $GF_UID -g grafana grafana && \
