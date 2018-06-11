@@ -36,8 +36,8 @@ RUN yarn run build
 # Final container
 FROM debian:stretch-slim
 
-ARG GF_UID="472"
-ARG GF_GID="472"
+ARG GF_UID="104"
+ARG GF_GID="107"
 
 ENV PATH=/usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     GF_PATHS_CONFIG="/etc/grafana/grafana.ini" \
