@@ -7,6 +7,7 @@ import (
 	"fmt"
 	_ "io/ioutil"
 	_ "net/http"
+	"net/url"
 	_ "net/url"
 	_ "path"
 	"strconv"
@@ -41,12 +42,20 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 	if err != nil {
 		plog.Info("Failed to create datasource info", err)
 	}
+	dsUrl := dsInfo.Url
+	if len(dsInfo.BasicAuthUser) > 0 && len(dsInfo.BasicAuthPassword) > 0 {
+		u, err := url.Parse(dsInfo.Url)
+		if err != nil {
+			plog.Info("Failed to parse datasource URL", err)
+		}
+		dsUrl = u.Scheme + "://" + dsInfo.BasicAuthUser + ":" + dsInfo.BasicAuthPassword + "@" + u.Host
+	}
 	result := &tsdb.Response{}
 	start := queryContext.TimeRange.GetFromAsMsEpoch()
 	startTime := strconv.FormatInt(start, 10)
 	end := queryContext.TimeRange.GetToAsMsEpoch()
 	endTime := strconv.FormatInt(end, 10)
-	db, err := sql.Open("crate", dsInfo.Url)
+	db, err := sql.Open("crate", dsUrl)
 	if err != nil {
 		plog.Info("Failed to open connection to datasource", err)
 	}
