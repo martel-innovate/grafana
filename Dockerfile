@@ -77,6 +77,7 @@ COPY tools/phantomjs/render.js ./tools/phantomjs/render.js
 EXPOSE 3000
 
 COPY ./packaging/docker/run.sh /run.sh
+COPY plugins /var/lib/grafana/plugins
 
 USER grafana
 ENTRYPOINT [ "/run.sh" ]
