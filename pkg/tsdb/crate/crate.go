@@ -42,6 +42,9 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 	if err != nil {
 		plog.Info("Failed to create datasource info", err)
 	}
+	timeColumn := dsJson["timeColumn"].(string)
+	schema := dsJson["schema"].(string)
+	table := dsJson["table"].(string)
 	dsUrl := dsInfo.Url
 	if len(dsInfo.BasicAuthUser) > 0 && len(dsInfo.BasicAuthPassword) > 0 {
 		u, err := url.Parse(dsInfo.Url)
@@ -70,9 +73,6 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 			plog.Info("Failed to create query model metric aggregate array", err)
 		}
 		metricColumn := m[0].(map[string]interface{})["column"].(string)
-		timeColumn := dsJson["timeColumn"].(string)
-		schema := dsJson["schema"].(string)
-		table := dsJson["table"].(string)
 		refID := q["refId"].(string)
 		queryString := fmt.Sprintf("SELECT %s,%s FROM %s.%s WHERE %s>%s AND %s<%s;", timeColumn, metricColumn, schema, table, timeColumn, startTime, timeColumn, endTime)
 		rows, err := db.Query(queryString)
@@ -90,15 +90,11 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 			if err := rows.Scan(&timeValue, &metricValue); err != nil {
 				plog.Info("Failed to scan rows for time and metric values", err)
 			}
-			floatTimeValue, err := strconv.ParseFloat(timeValue, 64)
+			point, err := parseDbValues(timeValue, metricValue)
 			if err != nil {
-				plog.Info("Failed to parse time value as float", err)
+				plog.Info("Failed to create time series point", err)
 			}
-			floatMetricValue, err := strconv.ParseFloat(metricValue, 64)
-			if err != nil {
-				plog.Info("Failed to parse metric value as float", err)
-			}
-			series.Points = append(series.Points, tsdb.NewTimePoint(null.FloatFrom(floatMetricValue), floatTimeValue))
+			series.Points = append(series.Points, *point)
 		}
 		if err := rows.Err(); err != nil {
 			plog.Info("Failed to parse row in datasource query response", err)
@@ -108,4 +104,19 @@ func (e *CrateExecutor) Query(ctx context.Context, dsInfo *models.DataSource, qu
 	}
 	result.Results = queryResults
 	return result, nil
+}
+
+func parseDbValues(timeValue string, metricValue string) (*tsdb.TimePoint, error) {
+	floatTimeValue, err := strconv.ParseFloat(timeValue, 64)
+	if err != nil {
+		plog.Info("Failed to parse time value as float", err)
+		return nil, err
+	}
+	floatMetricValue, err := strconv.ParseFloat(metricValue, 64)
+	if err != nil {
+		plog.Info("Failed to parse metric value as float", err)
+		return nil, err
+	}
+	point := tsdb.NewTimePoint(null.FloatFrom(floatMetricValue), floatTimeValue)
+	return &point, nil
 }
